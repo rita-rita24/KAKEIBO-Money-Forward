@@ -98,14 +98,24 @@ export default function Home() {
   const handlePrint = useCallback(() => {
     const el = printContentRef.current;
     if (el) {
-      // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
-      const maxHeight = 1062;
+      // Temporarily apply print-like styles to measure accurate height
+      const printArea = el.closest(".print-area") as HTMLElement;
+      if (printArea) {
+        printArea.classList.add("print-measuring");
+      }
       // Reset zoom first to measure natural height
       el.style.zoom = "1";
+      // Force layout recalculation
+      void el.offsetHeight;
       const naturalHeight = el.scrollHeight;
+      // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
+      const maxHeight = 1062;
       if (naturalHeight > maxHeight) {
         const scale = maxHeight / naturalHeight;
         el.style.zoom = String(scale);
+      }
+      if (printArea) {
+        printArea.classList.remove("print-measuring");
       }
     }
     // Set document title for PDF filename
