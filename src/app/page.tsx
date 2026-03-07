@@ -91,24 +91,26 @@ export default function Home() {
     <div className="min-h-screen py-8 px-4">
       {/* Input Form */}
       <div className="no-print max-w-2xl mx-auto mb-8">
-        <h1 className="text-2xl font-bold text-center mb-6 text-green-800">
+        <h1 className="text-2xl font-bold text-center mb-6 text-slate-700">
           家計簿作成ツール
         </h1>
 
-        <div className="bg-white rounded-lg shadow p-6 space-y-4 border-t-4 border-green-600">
+        <div className="bg-white rounded-lg shadow-md p-6 space-y-4 border-t-4 border-blue-400">
           <div>
-            <label className="block text-sm font-medium mb-1">年月</label>
+            <label className="block text-sm font-medium mb-1 text-slate-600">
+              年月
+            </label>
             <input
               type="month"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-slate-600">
                 収入（円）
               </label>
               <input
@@ -116,11 +118,11 @@ export default function Home() {
                 value={income}
                 onChange={(e) => setIncome(e.target.value)}
                 placeholder="例: 200000"
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-slate-600">
                 支出（円）
               </label>
               <input
@@ -128,16 +130,18 @@ export default function Home() {
                 value={expense}
                 onChange={(e) => setExpense(e.target.value)}
                 placeholder="例: 150000"
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
               />
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded px-4 py-3">
-            <span className="text-sm font-medium">収支（自動計算）：</span>
+          <div className="bg-amber-50 rounded-lg px-4 py-3 border border-amber-200">
+            <span className="text-sm font-medium text-slate-600">
+              収支（自動計算）：
+            </span>
             <span
               className={`text-lg font-bold ml-2 ${
-                balance >= 0 ? "text-green-600" : "text-red-600"
+                balance >= 0 ? "text-emerald-600" : "text-rose-600"
               }`}
             >
               {balance >= 0 ? "+" : ""}
@@ -146,10 +150,10 @@ export default function Home() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-1 text-slate-600">
               各項目（タブ区切りで貼り付け）
             </label>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-slate-400 mb-2">
               Money
               Forwardなどからコピーした「項目名→金額→割合」のタブ区切りデータを貼り付けてください
             </p>
@@ -158,31 +162,33 @@ export default function Home() {
               onChange={(e) => setItemsText(e.target.value)}
               rows={12}
               placeholder={`食費 合計\t17,415円\t13.25%\nコンビニ\t9,224円\t7.02%\n外食\t8,191円\t6.23%`}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">コメント</label>
+            <label className="block text-sm font-medium mb-1 text-slate-600">
+              コメント
+            </label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
               placeholder="今月の振り返りなど"
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
             />
           </div>
 
           <div className="flex gap-3">
             <button
               onClick={() => setShowPreview(true)}
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 font-medium cursor-pointer"
+              className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 font-medium cursor-pointer transition-colors"
             >
               プレビュー表示
             </button>
             <button
               onClick={loadSample}
-              className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 text-sm cursor-pointer"
+              className="bg-slate-100 text-slate-600 py-2 px-4 rounded-lg hover:bg-slate-200 text-sm cursor-pointer transition-colors border border-slate-200"
             >
               サンプルデータ
             </button>
@@ -196,27 +202,27 @@ export default function Home() {
           <div className="no-print max-w-2xl mx-auto mb-4 flex gap-3">
             <button
               onClick={handlePrint}
-              className="bg-green-600 text-white py-2 px-6 rounded hover:bg-green-700 font-medium cursor-pointer"
+              className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 font-medium cursor-pointer transition-colors"
             >
               印刷する
             </button>
             <button
               onClick={() => setShowPreview(false)}
-              className="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 cursor-pointer"
+              className="bg-slate-100 text-slate-600 py-2 px-4 rounded-lg hover:bg-slate-200 cursor-pointer transition-colors border border-slate-200"
             >
               プレビューを閉じる
             </button>
           </div>
 
-          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-green-200">
+          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg">
             <div className="p-8">
               {/* Header */}
-              <div className="text-center mb-4 border-b-2 border-green-700 pb-3">
-                <h2 className="text-xl font-bold tracking-wider text-green-800">
+              <div className="text-center mb-4 border-b-2 border-slate-300 pb-3">
+                <h2 className="text-xl font-bold tracking-wider text-slate-700">
                   家 計 簿
                 </h2>
                 {date && (
-                  <p className="text-lg mt-1 font-medium text-green-700">
+                  <p className="text-lg mt-1 font-medium text-slate-500">
                     {date.replace("-", "年")}月
                   </p>
                 )}
@@ -226,29 +232,29 @@ export default function Home() {
               <div className="mb-4">
                 <table className="summary-table w-full border-collapse">
                   <tbody>
-                    <tr className="border border-green-400">
-                      <td className="border border-green-400 bg-green-100 px-4 py-2 font-medium w-1/3 text-center text-green-800">
+                    <tr className="border border-slate-300">
+                      <td className="border border-slate-300 bg-blue-50 px-4 py-2 font-medium w-1/3 text-center text-blue-700">
                         収入
                       </td>
-                      <td className="border border-green-400 px-4 py-2 text-right">
+                      <td className="border border-slate-300 px-4 py-2 text-right">
                         {formatCurrency(incomeNum)}
                       </td>
                     </tr>
-                    <tr className="border border-green-400">
-                      <td className="border border-green-400 bg-green-100 px-4 py-2 font-medium text-center text-green-800">
+                    <tr className="border border-slate-300">
+                      <td className="border border-slate-300 bg-amber-50 px-4 py-2 font-medium text-center text-amber-700">
                         支出
                       </td>
-                      <td className="border border-green-400 px-4 py-2 text-right">
+                      <td className="border border-slate-300 px-4 py-2 text-right">
                         {formatCurrency(expenseNum)}
                       </td>
                     </tr>
-                    <tr className="border border-green-400">
-                      <td className="border border-green-400 bg-green-600 px-4 py-2 font-bold text-center text-white">
+                    <tr className="border border-slate-300">
+                      <td className="border border-slate-300 bg-slate-600 px-4 py-2 font-bold text-center text-white">
                         収支
                       </td>
                       <td
-                        className={`border border-green-400 px-4 py-2 text-right font-bold ${
-                          balance >= 0 ? "text-green-700" : "text-red-600"
+                        className={`border border-slate-300 px-4 py-2 text-right font-bold ${
+                          balance >= 0 ? "text-emerald-600" : "text-rose-600"
                         }`}
                       >
                         {balance >= 0 ? "+" : ""}
@@ -262,19 +268,19 @@ export default function Home() {
               {/* Items Detail */}
               {parsedItems.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-bold mb-1 border-b-2 border-green-600 pb-1 text-green-800">
+                  <h3 className="text-sm font-bold mb-1 border-b-2 border-slate-400 pb-1 text-slate-700">
                     支出内訳
                   </h3>
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="bg-green-700 text-white">
-                        <th className="border border-green-600 px-3 py-1.5 text-center">
+                      <tr className="bg-slate-600 text-white">
+                        <th className="border border-slate-500 px-3 py-1.5 text-center">
                           項目
                         </th>
-                        <th className="border border-green-600 px-3 py-1.5 text-center w-28">
+                        <th className="border border-slate-500 px-3 py-1.5 text-center w-28">
                           金額
                         </th>
-                        <th className="border border-green-600 px-3 py-1.5 text-center w-20">
+                        <th className="border border-slate-500 px-3 py-1.5 text-center w-20">
                           割合
                         </th>
                       </tr>
@@ -285,14 +291,14 @@ export default function Home() {
                           key={idx}
                           className={
                             item.isCategory
-                              ? "bg-green-100 font-bold border-t-2 border-t-green-500"
-                              : "hover:bg-green-50"
+                              ? "bg-amber-50 font-bold border-t-2 border-t-amber-300"
+                              : "hover:bg-slate-50"
                           }
                         >
                           <td
-                            className={`border border-green-300 px-3 py-1 ${
+                            className={`border border-slate-200 px-3 py-1 ${
                               item.isCategory
-                                ? "text-green-800 bg-green-100"
+                                ? "text-amber-800 bg-amber-50"
                                 : "pl-6"
                             }`}
                           >
@@ -300,18 +306,18 @@ export default function Home() {
                             {item.name}
                           </td>
                           <td
-                            className={`border border-green-300 px-3 py-1 text-right ${
+                            className={`border border-slate-200 px-3 py-1 text-right ${
                               item.isCategory
-                                ? "text-green-800 bg-green-100"
+                                ? "text-amber-800 bg-amber-50"
                                 : ""
                             }`}
                           >
                             {formatCurrency(item.amount)}
                           </td>
                           <td
-                            className={`border border-green-300 px-3 py-1 text-right ${
+                            className={`border border-slate-200 px-3 py-1 text-right ${
                               item.isCategory
-                                ? "text-green-800 bg-green-100"
+                                ? "text-amber-800 bg-amber-50"
                                 : ""
                             }`}
                           >
@@ -327,10 +333,10 @@ export default function Home() {
               {/* Comment */}
               {comment && (
                 <div className="comment-section mb-2">
-                  <h3 className="text-sm font-bold mb-1 border-b-2 border-green-600 pb-1 text-green-800">
+                  <h3 className="text-sm font-bold mb-1 border-b-2 border-slate-400 pb-1 text-slate-700">
                     コメント
                   </h3>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2 border border-green-300 rounded bg-green-50 min-h-[3em]">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2 border border-slate-200 rounded bg-slate-50 min-h-[3em]">
                     {comment}
                   </p>
                 </div>
