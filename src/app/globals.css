@@ -75,41 +75,7 @@ body {
   padding: 4px 8px !important;
 }
 
-/* Measuring class: mirrors print styles so JS can measure accurate height */
-.print-measuring h2 {
-  font-size: 16pt !important;
-  margin-bottom: 2mm !important;
-}
-
-.print-measuring h3 {
-  font-size: 9pt !important;
-  margin-bottom: 1mm !important;
-}
-
-.print-measuring table {
-  font-size: 8pt !important;
-}
-
-.print-measuring td,
-.print-measuring th {
-  padding: 1px 4px !important;
-}
-
-.print-measuring .comment-section p {
-  font-size: 8pt !important;
-  min-height: 2em !important;
-}
-
-.print-measuring .summary-table td {
-  padding: 2px 6px !important;
-  font-size: 9pt !important;
-}
-
-.print-measuring > div {
-  padding: 4mm 6mm !important;
-}
-
-/* Print styles */
+/* Print styles (fallback for browser print) */
 @media print {
   body {
     background: white;
@@ -124,53 +90,14 @@ body {
   }
 
   .print-area {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 0;
     box-shadow: none;
     border: none;
     border-radius: 0;
-    page-break-inside: avoid;
-    break-inside: avoid;
     overflow: visible;
   }
 
-  .print-area > div {
-    padding: 4mm 6mm !important;
-  }
-
-  .print-area h2 {
-    font-size: 16pt !important;
-    margin-bottom: 2mm !important;
-  }
-
-  .print-area h3 {
-    font-size: 9pt !important;
-    margin-bottom: 1mm !important;
-  }
-
-  .print-area table {
-    font-size: 8pt !important;
-  }
-
-  .print-area td,
-  .print-area th {
-    padding: 1px 4px !important;
-  }
-
-  .print-area .comment-section p {
-    font-size: 8pt !important;
-    min-height: 2em !important;
-  }
-
-  .print-area .summary-table td {
-    padding: 2px 6px !important;
-    font-size: 9pt !important;
-  }
-
   @page {
-    margin: 8mm;
+    margin: 5mm;
     size: A4;
   }
 }

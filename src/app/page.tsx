@@ -3,6 +3,8 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ja } from "date-fns/locale";
+import html2canvas from "html2canvas-pro";
+import { jsPDF } from "jspdf";
 import "react-datepicker/dist/react-datepicker.css";
 
 registerLocale("ja", ja);
@@ -40,26 +42,56 @@ function formatCurrency(value: number): string {
   return value.toLocaleString("ja-JP") + "円";
 }
 
-const SAMPLE_ITEMS = `食費 合計\t17,415円\t13.25%
-コンビニ\t9,224円\t7.02%
-外食\t8,191円\t6.23%
-教養・教育 合計\t1,500円\t1.14%
-書籍\t1,500円\t1.14%
-現金・カード 合計\t26,225円\t19.95%
-カード引き落とし\t26,225円\t19.95%
-通信費 合計\t6,911円\t5.26%
-携帯電話\t6,911円\t5.26%
-住宅 合計\t30,000円\t22.82%
-実家のお金\t30,000円\t22.82%
-税・社会保障 合計\t8円\t0.01%
-所得税・住民税\t2円\t0.00%
-その他税・社会保障\t6円\t0.00%
-保険 合計\t190円\t0.14%
-その他保険\t190円\t0.14%
-その他 合計\t49,206円\t37.43%
-奨学金返済\t16,000円\t12.17%
-投資\t5,000円\t3.80%
-雑費\t28,206円\t21.46%`;
+const SAMPLE_ITEMS = `食費 合計\t35,000円\t10.00%
+コンビニ\t12,000円\t3.43%
+スーパー\t10,500円\t3.00%
+外食\t8,500円\t2.43%
+カフェ\t4,000円\t1.14%
+日用品 合計\t15,000円\t4.29%
+日用品\t8,500円\t2.43%
+ドラッグストア\t6,500円\t1.86%
+趣味・娯楽 合計\t18,000円\t5.14%
+サブスク\t5,900円\t1.69%
+映画・音楽・ゲーム\t3,100円\t0.89%
+本\t5,500円\t1.57%
+ゲーム\t3,500円\t1.00%
+交通費 合計\t25,000円\t7.14%
+定期代\t16,870円\t4.82%
+電車\t3,530円\t1.01%
+バス\t2,600円\t0.74%
+タクシー\t2,000円\t0.57%
+衣服・美容 合計\t22,000円\t6.29%
+美容院\t7,500円\t2.14%
+衣服\t8,200円\t2.34%
+アクセサリー\t6,300円\t1.80%
+健康・医療 合計\t20,000円\t5.71%
+プロテイン\t7,336円\t2.10%
+フィットネス\t4,800円\t1.37%
+歯科\t5,364円\t1.53%
+薬局\t2,500円\t0.71%
+教養・教育 合計\t30,000円\t8.57%
+資格受験費用\t10,000円\t2.86%
+AI\t3,297円\t0.94%
+書籍\t12,703円\t3.63%
+セミナー\t4,000円\t1.14%
+現金・カード 合計\t15,000円\t4.29%
+ATM引き出し\t10,000円\t2.86%
+カード引き落とし\t5,000円\t1.43%
+通信費 合計\t12,000円\t3.43%
+携帯電話\t3,502円\t1.00%
+インターネット\t4,400円\t1.26%
+情報サービス\t1,538円\t0.44%
+その他通信費\t2,560円\t0.73%
+住宅 合計\t68,000円\t19.43%
+家賃\t55,000円\t15.71%
+光熱費\t13,000円\t3.71%
+税・社会保障 合計\t30,000円\t8.57%
+奨学金\t16,000円\t4.57%
+所得税・住民税\t14,000円\t4.00%
+保険 合計\t5,000円\t1.43%
+生命保険\t5,000円\t1.43%
+その他 合計\t55,000円\t15.71%
+投資\t55,000円\t15.71%`;
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -95,49 +127,60 @@ export default function Home() {
     return `家計簿-${y}年${m}月`;
   }, [selectedDate]);
 
-  const handlePrint = useCallback(() => {
+  const handlePrint = useCallback(async () => {
     const el = printContentRef.current;
-    if (el) {
-      // Temporarily apply print-like styles to measure accurate height
-      const printArea = el.closest(".print-area") as HTMLElement;
-      if (printArea) {
-        printArea.classList.add("print-measuring");
-      }
-      // Reset zoom first to measure natural height
-      el.style.zoom = "1";
-      // Force layout recalculation
-      void el.offsetHeight;
-      const naturalHeight = el.scrollHeight;
-      // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
-      const maxHeight = 1062;
-      if (naturalHeight > maxHeight) {
-        const scale = maxHeight / naturalHeight;
-        el.style.zoom = String(scale);
-      }
-      if (printArea) {
-        printArea.classList.remove("print-measuring");
-      }
+    if (!el) return;
+
+    // Capture the element exactly as displayed on screen
+    const canvas = await html2canvas(el, {
+      scale: 2, // High resolution for crisp PDF
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
+
+    // Use JPEG with quality 0.85 to keep PDF under 10MB (typically under 1MB)
+    const imgData = canvas.toDataURL("image/jpeg", 0.85);
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+
+    // A4 dimensions in mm
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    const margin = 8; // mm margin on each side
+    const topMargin = 5;
+    const bottomMargin = 5;
+
+    const contentWidth = pdfWidth - margin * 2;
+    const contentMaxHeight = pdfHeight - topMargin - bottomMargin;
+
+    // Scale image to fit within the content area
+    const ratio = imgWidth / imgHeight;
+    let finalWidth = contentWidth;
+    let finalHeight = contentWidth / ratio;
+
+    // If too tall, scale down to fit height
+    if (finalHeight > contentMaxHeight) {
+      finalHeight = contentMaxHeight;
+      finalWidth = contentMaxHeight * ratio;
     }
-    // Set document title for PDF filename
-    const originalTitle = document.title;
-    document.title = formatDateForTitle();
-    window.print();
-    document.title = originalTitle;
-    // Reset after printing
-    if (el) {
-      el.style.zoom = "1";
-    }
+
+    // Center horizontally
+    const xOffset = margin + (contentWidth - finalWidth) / 2;
+
+    const pdf = new jsPDF("portrait", "mm", "a4");
+    pdf.addImage(imgData, "JPEG", xOffset, topMargin, finalWidth, finalHeight);
+    pdf.save(`${formatDateForTitle()}.pdf`);
   }, [formatDateForTitle]);
 
   const loadSample = () => {
     setSelectedDate(new Date(2025, 0));
-    setIncome("131455");
-    setExpense("131455");
+    setIncome("350000");
+    setExpense("350000");
     setSavings("30000");
     setInvestment("10000");
     setCrypto("5000");
     setItemsText(SAMPLE_ITEMS);
-    setComment("今月は外食が多かった。来月は自炊を増やす。");
+    setComment("今月は外食が多かった。来月は自炊を増やす。\n投資信託の積立額を見直す予定。\n光熱費が季節的に上がっているので注意。");
   };
 
   return (
@@ -197,9 +240,8 @@ export default function Home() {
               収支（自動計算）：
             </span>
             <span
-              className={`text-lg font-bold ml-2 ${
-                balance >= 0 ? "text-emerald-600" : "text-rose-600"
-              }`}
+              className={`text-lg font-bold ml-2 ${balance >= 0 ? "text-emerald-600" : "text-rose-600"
+                }`}
             >
               {balance >= 0 ? "+" : ""}
               {formatCurrency(balance)}
@@ -300,7 +342,7 @@ export default function Home() {
               onClick={handlePrint}
               className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 font-medium cursor-pointer transition-colors"
             >
-              印刷する
+              PDFダウンロード
             </button>
             <button
               onClick={() => setShowPreview(false)}
@@ -310,81 +352,81 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg overflow-hidden">
+          <div className="print-area max-w-[160mm] mx-auto bg-white shadow-lg border border-stone-200 rounded-lg overflow-hidden">
             <div ref={printContentRef} className="p-8 print-scale-wrapper">
               {/* Header */}
-              <div className="text-center mb-4 border-b-2 border-slate-300 pb-3">
-                <h2 className="text-xl font-bold tracking-wider text-slate-700">
+              <div className="text-center mb-5 border-b-2 border-stone-300 pb-3">
+                <h2 className="text-xl font-bold tracking-[0.3em] text-stone-800">
                   家 計 簿
                 </h2>
                 {selectedDate && (
-                  <p className="text-lg mt-1 font-medium text-slate-500">
+                  <p className="text-base mt-1 font-medium text-stone-500">
                     {selectedDate.getFullYear()}年{selectedDate.getMonth() + 1}月
                   </p>
                 )}
               </div>
 
               {/* Summary */}
-              <div className="mb-4">
+              <div className="mb-5 grid grid-cols-2 gap-3">
+                {/* Left: 収入・支出・収支 */}
                 <table className="summary-table w-full border-collapse">
                   <tbody>
-                    <tr className="border border-slate-300">
-                      <td className="border border-slate-300 bg-blue-50 px-4 py-2 font-medium w-1/3 text-center text-blue-700">
+                    <tr>
+                      <td className="border border-stone-300 bg-sky-50 px-3 py-1.5 font-medium whitespace-nowrap text-center text-sky-800 text-sm">
                         収入
                       </td>
-                      <td className="border border-slate-300 px-4 py-2 text-right">
+                      <td className="border border-stone-300 px-3 py-1.5 text-right text-sm text-stone-700">
                         {formatCurrency(incomeNum)}
                       </td>
                     </tr>
-                    <tr className="border border-slate-300">
-                      <td className="border border-slate-300 bg-amber-50 px-4 py-2 font-medium text-center text-amber-700">
+                    <tr>
+                      <td className="border border-stone-300 bg-rose-50 px-3 py-1.5 font-medium whitespace-nowrap text-center text-rose-800 text-sm">
                         支出
                       </td>
-                      <td className="border border-slate-300 px-4 py-2 text-right">
+                      <td className="border border-stone-300 px-3 py-1.5 text-right text-sm text-stone-700">
                         {formatCurrency(expenseNum)}
                       </td>
                     </tr>
-                    {savingsNum > 0 && (
-                      <tr className="border border-slate-300">
-                        <td className="border border-slate-300 bg-emerald-50 px-4 py-2 font-medium text-center text-emerald-700">
-                          貯金
-                        </td>
-                        <td className="border border-slate-300 px-4 py-2 text-right">
-                          {formatCurrency(savingsNum)}
-                        </td>
-                      </tr>
-                    )}
-                    {investmentNum > 0 && (
-                      <tr className="border border-slate-300">
-                        <td className="border border-slate-300 bg-indigo-50 px-4 py-2 font-medium text-center text-indigo-700">
-                          投資信託
-                        </td>
-                        <td className="border border-slate-300 px-4 py-2 text-right">
-                          {formatCurrency(investmentNum)}
-                        </td>
-                      </tr>
-                    )}
-                    {cryptoNum > 0 && (
-                      <tr className="border border-slate-300">
-                        <td className="border border-slate-300 bg-purple-50 px-4 py-2 font-medium text-center text-purple-700">
-                          暗号資産
-                        </td>
-                        <td className="border border-slate-300 px-4 py-2 text-right">
-                          {formatCurrency(cryptoNum)}
-                        </td>
-                      </tr>
-                    )}
-                    <tr className="border border-slate-300">
-                      <td className="border border-slate-300 bg-slate-600 px-4 py-2 font-bold text-center text-white">
+                    <tr>
+                      <td className="border border-stone-300 bg-stone-700 px-3 py-1.5 font-bold whitespace-nowrap text-center text-white text-sm">
                         収支
                       </td>
                       <td
-                        className={`border border-slate-300 px-4 py-2 text-right font-bold ${
-                          balance >= 0 ? "text-emerald-600" : "text-rose-600"
-                        }`}
+                        className={`border border-stone-300 px-3 py-1.5 text-right font-bold text-sm ${balance >= 0 ? "text-sky-700" : "text-rose-600"
+                          }`}
                       >
                         {balance >= 0 ? "+" : ""}
                         {formatCurrency(balance)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Right: 貯金・投資信託・暗号資産 */}
+                <table className="summary-table w-full border-collapse">
+                  <tbody>
+                    <tr>
+                      <td className="border border-stone-300 bg-emerald-50 px-3 py-1.5 font-medium whitespace-nowrap text-center text-emerald-800 text-sm">
+                        貯金
+                      </td>
+                      <td className="border border-stone-300 px-3 py-1.5 text-right text-sm text-stone-700">
+                        {formatCurrency(savingsNum)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-stone-300 bg-violet-50 px-3 py-1.5 font-medium whitespace-nowrap text-center text-violet-800 text-sm">
+                        投資信託
+                      </td>
+                      <td className="border border-stone-300 px-3 py-1.5 text-right text-sm text-stone-700">
+                        {formatCurrency(investmentNum)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-stone-300 bg-amber-50 px-3 py-1.5 font-medium whitespace-nowrap text-center text-amber-800 text-sm">
+                        暗号資産
+                      </td>
+                      <td className="border border-stone-300 px-3 py-1.5 text-right text-sm text-stone-700">
+                        {formatCurrency(cryptoNum)}
                       </td>
                     </tr>
                   </tbody>
@@ -394,19 +436,19 @@ export default function Home() {
               {/* Items Detail */}
               {parsedItems.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-sm font-bold mb-1 border-b-2 border-slate-400 pb-1 text-slate-700">
+                  <h3 className="text-sm font-bold mb-1.5 border-b-2 border-stone-300 pb-1 text-stone-700">
                     支出内訳
                   </h3>
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="bg-slate-600 text-white">
-                        <th className="border border-slate-500 px-3 py-1.5 text-center">
+                      <tr className="bg-stone-700 text-white">
+                        <th className="border border-stone-600 px-3 py-1.5 text-center">
                           項目
                         </th>
-                        <th className="border border-slate-500 px-3 py-1.5 text-center w-28">
+                        <th className="border border-stone-600 px-3 py-1.5 text-center w-32">
                           金額
                         </th>
-                        <th className="border border-slate-500 px-3 py-1.5 text-center w-20">
+                        <th className="border border-stone-600 px-3 py-1.5 text-center w-16">
                           割合
                         </th>
                       </tr>
@@ -417,35 +459,32 @@ export default function Home() {
                           key={idx}
                           className={
                             item.isCategory
-                              ? "bg-amber-50 font-bold border-t-2 border-t-amber-300"
-                              : "hover:bg-slate-50"
+                              ? "bg-stone-100 font-bold border-t-2 border-t-stone-400"
+                              : "hover:bg-stone-50"
                           }
                         >
                           <td
-                            className={`border border-slate-200 px-3 py-1 ${
-                              item.isCategory
-                                ? "text-amber-800 bg-amber-50"
-                                : "pl-6"
-                            }`}
+                            className={`border border-stone-200 px-3 py-1 ${item.isCategory
+                              ? "text-stone-800"
+                              : "pl-4 text-stone-600"
+                              }`}
                           >
                             {item.isCategory ? "■ " : ""}
                             {item.name}
                           </td>
                           <td
-                            className={`border border-slate-200 px-3 py-1 text-right ${
-                              item.isCategory
-                                ? "text-amber-800 bg-amber-50"
-                                : ""
-                            }`}
+                            className={`border border-stone-200 px-3 py-1 text-right ${item.isCategory
+                              ? "text-stone-800"
+                              : "text-stone-600"
+                              }`}
                           >
                             {formatCurrency(item.amount)}
                           </td>
                           <td
-                            className={`border border-slate-200 px-3 py-1 text-right ${
-                              item.isCategory
-                                ? "text-amber-800 bg-amber-50"
-                                : ""
-                            }`}
+                            className={`border border-stone-200 px-3 py-1 text-right ${item.isCategory
+                              ? "text-stone-800"
+                              : "text-stone-600"
+                              }`}
                           >
                             {item.percentage.toFixed(2)}%
                           </td>
@@ -459,10 +498,10 @@ export default function Home() {
               {/* Comment */}
               {comment && (
                 <div className="comment-section mb-2">
-                  <h3 className="text-sm font-bold mb-1 border-b-2 border-slate-400 pb-1 text-slate-700">
+                  <h3 className="text-sm font-bold mb-1.5 border-b-2 border-stone-300 pb-1 text-stone-700">
                     コメント
                   </h3>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2 border border-slate-200 rounded bg-slate-50 min-h-[3em]">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2.5 border border-stone-200 rounded bg-stone-50 min-h-[3em] text-stone-600">
                     {comment}
                   </p>
                 </div>
