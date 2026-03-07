@@ -60,6 +60,9 @@ export default function Home() {
   const [date, setDate] = useState("");
   const [income, setIncome] = useState("");
   const [expense, setExpense] = useState("");
+  const [savings, setSavings] = useState("");
+  const [investment, setInvestment] = useState("");
+  const [crypto, setCrypto] = useState("");
   const [itemsText, setItemsText] = useState("");
   const [comment, setComment] = useState("");
   const [showPreview, setShowPreview] = useState(false);
@@ -74,6 +77,9 @@ export default function Home() {
 
   const incomeNum = parseInt(income.replace(/,/g, ""), 10) || 0;
   const expenseNum = parseInt(expense.replace(/,/g, ""), 10) || 0;
+  const savingsNum = parseInt(savings.replace(/,/g, ""), 10) || 0;
+  const investmentNum = parseInt(investment.replace(/,/g, ""), 10) || 0;
+  const cryptoNum = parseInt(crypto.replace(/,/g, ""), 10) || 0;
 
   const handlePrint = () => {
     window.print();
@@ -83,6 +89,9 @@ export default function Home() {
     setDate("2025-01");
     setIncome("131455");
     setExpense("131455");
+    setSavings("30000");
+    setInvestment("10000");
+    setCrypto("5000");
     setItemsText(SAMPLE_ITEMS);
     setComment("今月は外食が多かった。来月は自炊を増やす。");
   };
@@ -147,6 +156,45 @@ export default function Home() {
               {balance >= 0 ? "+" : ""}
               {formatCurrency(balance)}
             </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-600">
+                貯金（円）
+              </label>
+              <input
+                type="text"
+                value={savings}
+                onChange={(e) => setSavings(e.target.value)}
+                placeholder="例: 50000"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-600">
+                投資信託（円）
+              </label>
+              <input
+                type="text"
+                value={investment}
+                onChange={(e) => setInvestment(e.target.value)}
+                placeholder="例: 30000"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-600">
+                暗号資産（円）
+              </label>
+              <input
+                type="text"
+                value={crypto}
+                onChange={(e) => setCrypto(e.target.value)}
+                placeholder="例: 10000"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+              />
+            </div>
           </div>
 
           <div>
@@ -248,6 +296,36 @@ export default function Home() {
                         {formatCurrency(expenseNum)}
                       </td>
                     </tr>
+                    {savingsNum > 0 && (
+                      <tr className="border border-slate-300">
+                        <td className="border border-slate-300 bg-emerald-50 px-4 py-2 font-medium text-center text-emerald-700">
+                          貯金
+                        </td>
+                        <td className="border border-slate-300 px-4 py-2 text-right">
+                          {formatCurrency(savingsNum)}
+                        </td>
+                      </tr>
+                    )}
+                    {investmentNum > 0 && (
+                      <tr className="border border-slate-300">
+                        <td className="border border-slate-300 bg-indigo-50 px-4 py-2 font-medium text-center text-indigo-700">
+                          投資信託
+                        </td>
+                        <td className="border border-slate-300 px-4 py-2 text-right">
+                          {formatCurrency(investmentNum)}
+                        </td>
+                      </tr>
+                    )}
+                    {cryptoNum > 0 && (
+                      <tr className="border border-slate-300">
+                        <td className="border border-slate-300 bg-purple-50 px-4 py-2 font-medium text-center text-purple-700">
+                          暗号資産
+                        </td>
+                        <td className="border border-slate-300 px-4 py-2 text-right">
+                          {formatCurrency(cryptoNum)}
+                        </td>
+                      </tr>
+                    )}
                     <tr className="border border-slate-300">
                       <td className="border border-slate-300 bg-slate-600 px-4 py-2 font-bold text-center text-white">
                         収支
