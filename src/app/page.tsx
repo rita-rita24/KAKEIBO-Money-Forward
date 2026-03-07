@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 
 interface ItemRow {
   name: string;
@@ -81,9 +81,30 @@ export default function Home() {
   const investmentNum = parseInt(investment.replace(/,/g, ""), 10) || 0;
   const cryptoNum = parseInt(crypto.replace(/,/g, ""), 10) || 0;
 
-  const handlePrint = () => {
+  const printContentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useCallback(() => {
+    const el = printContentRef.current;
+    if (el) {
+      // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
+      const maxHeight = 1062;
+      // Reset scale first to measure natural height
+      el.style.transform = "none";
+      const naturalHeight = el.scrollHeight;
+      if (naturalHeight > maxHeight) {
+        const scale = maxHeight / naturalHeight;
+        el.style.transform = `scale(${scale})`;
+        el.style.transformOrigin = "top left";
+        el.style.width = `${100 / scale}%`;
+      }
+    }
     window.print();
-  };
+    // Reset after printing
+    if (el) {
+      el.style.transform = "none";
+      el.style.width = "100%";
+    }
+  }, []);
 
   const loadSample = () => {
     setDate("2025-01");
@@ -262,8 +283,8 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg">
-            <div className="p-8">
+          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg overflow-hidden">
+            <div ref={printContentRef} className="p-8 print-scale-wrapper">
               {/* Header */}
               <div className="text-center mb-4 border-b-2 border-slate-300 pb-3">
                 <h2 className="text-xl font-bold tracking-wider text-slate-700">

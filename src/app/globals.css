@@ -38,10 +38,17 @@ body {
     padding: 0;
     box-shadow: none;
     border: none;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .print-area > div {
     padding: 4mm 6mm !important;
+  }
+
+  /* Shrink content to fit one page */
+  .print-scale-wrapper {
+    transform-origin: top left;
   }
 
   .print-area h2 {
