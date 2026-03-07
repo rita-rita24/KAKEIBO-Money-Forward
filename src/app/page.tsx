@@ -268,13 +268,13 @@ export default function Home() {
                   <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr className="bg-green-700 text-white">
-                        <th className="border border-green-600 px-3 py-1.5 text-left">
+                        <th className="border border-green-600 px-3 py-1.5 text-center">
                           項目
                         </th>
-                        <th className="border border-green-600 px-3 py-1.5 text-right w-28">
+                        <th className="border border-green-600 px-3 py-1.5 text-center w-28">
                           金額
                         </th>
-                        <th className="border border-green-600 px-3 py-1.5 text-right w-20">
+                        <th className="border border-green-600 px-3 py-1.5 text-center w-20">
                           割合
                         </th>
                       </tr>
