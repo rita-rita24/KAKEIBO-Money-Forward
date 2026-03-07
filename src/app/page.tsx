@@ -88,28 +88,36 @@ export default function Home() {
 
   const printContentRef = useRef<HTMLDivElement>(null);
 
+  const formatDateForTitle = useCallback(() => {
+    if (!selectedDate) return "家計簿";
+    const y = selectedDate.getFullYear();
+    const m = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    return `家計簿-${y}年${m}月`;
+  }, [selectedDate]);
+
   const handlePrint = useCallback(() => {
     const el = printContentRef.current;
     if (el) {
       // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
       const maxHeight = 1062;
-      // Reset scale first to measure natural height
-      el.style.transform = "none";
+      // Reset zoom first to measure natural height
+      el.style.zoom = "1";
       const naturalHeight = el.scrollHeight;
       if (naturalHeight > maxHeight) {
         const scale = maxHeight / naturalHeight;
-        el.style.transform = `scale(${scale})`;
-        el.style.transformOrigin = "top left";
-        el.style.width = `${100 / scale}%`;
+        el.style.zoom = String(scale);
       }
     }
+    // Set document title for PDF filename
+    const originalTitle = document.title;
+    document.title = formatDateForTitle();
     window.print();
+    document.title = originalTitle;
     // Reset after printing
     if (el) {
-      el.style.transform = "none";
-      el.style.width = "100%";
+      el.style.zoom = "1";
     }
-  }, []);
+  }, [formatDateForTitle]);
 
   const loadSample = () => {
     setSelectedDate(new Date(2025, 0));
