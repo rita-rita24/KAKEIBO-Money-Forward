@@ -75,6 +75,40 @@ body {
   padding: 4px 8px !important;
 }
 
+/* Measuring class: mirrors print styles so JS can measure accurate height */
+.print-measuring h2 {
+  font-size: 16pt !important;
+  margin-bottom: 2mm !important;
+}
+
+.print-measuring h3 {
+  font-size: 9pt !important;
+  margin-bottom: 1mm !important;
+}
+
+.print-measuring table {
+  font-size: 8pt !important;
+}
+
+.print-measuring td,
+.print-measuring th {
+  padding: 1px 4px !important;
+}
+
+.print-measuring .comment-section p {
+  font-size: 8pt !important;
+  min-height: 2em !important;
+}
+
+.print-measuring .summary-table td {
+  padding: 2px 6px !important;
+  font-size: 9pt !important;
+}
+
+.print-measuring > div {
+  padding: 4mm 6mm !important;
+}
+
 /* Print styles */
 @media print {
   body {
@@ -104,12 +138,6 @@ body {
 
   .print-area > div {
     padding: 4mm 6mm !important;
-  }
-
-  /* Ensure content fits on one page */
-  .print-scale-wrapper {
-    max-height: 281mm;
-    overflow: hidden;
   }
 
   .print-area h2 {
