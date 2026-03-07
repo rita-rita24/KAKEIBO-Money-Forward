@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { ja } from "date-fns/locale";
+import "react-datepicker/dist/react-datepicker.css";
+
+registerLocale("ja", ja);
 
 interface ItemRow {
   name: string;
@@ -57,7 +62,7 @@ const SAMPLE_ITEMS = `食費 合計\t17,415円\t13.25%
 雑費\t28,206円\t21.46%`;
 
 export default function Home() {
-  const [date, setDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [income, setIncome] = useState("");
   const [expense, setExpense] = useState("");
   const [savings, setSavings] = useState("");
@@ -81,12 +86,33 @@ export default function Home() {
   const investmentNum = parseInt(investment.replace(/,/g, ""), 10) || 0;
   const cryptoNum = parseInt(crypto.replace(/,/g, ""), 10) || 0;
 
-  const handlePrint = () => {
+  const printContentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useCallback(() => {
+    const el = printContentRef.current;
+    if (el) {
+      // A4 printable height with 8mm margins: 297mm - 16mm = 281mm ≈ 1062px at 96dpi
+      const maxHeight = 1062;
+      // Reset scale first to measure natural height
+      el.style.transform = "none";
+      const naturalHeight = el.scrollHeight;
+      if (naturalHeight > maxHeight) {
+        const scale = maxHeight / naturalHeight;
+        el.style.transform = `scale(${scale})`;
+        el.style.transformOrigin = "top left";
+        el.style.width = `${100 / scale}%`;
+      }
+    }
     window.print();
-  };
+    // Reset after printing
+    if (el) {
+      el.style.transform = "none";
+      el.style.width = "100%";
+    }
+  }, []);
 
   const loadSample = () => {
-    setDate("2025-01");
+    setSelectedDate(new Date(2025, 0));
     setIncome("131455");
     setExpense("131455");
     setSavings("30000");
@@ -109,11 +135,15 @@ export default function Home() {
             <label className="block text-sm font-medium mb-1 text-slate-600">
               年月
             </label>
-            <input
-              type="month"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date: Date | null) => setSelectedDate(date)}
+              dateFormat="yyyy年MM月"
+              showMonthYearPicker
+              locale="ja"
+              placeholderText="年月を選択"
               className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+              wrapperClassName="w-full"
             />
           </div>
 
@@ -262,16 +292,16 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg">
-            <div className="p-8">
+          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-slate-200 rounded-lg overflow-hidden">
+            <div ref={printContentRef} className="p-8 print-scale-wrapper">
               {/* Header */}
               <div className="text-center mb-4 border-b-2 border-slate-300 pb-3">
                 <h2 className="text-xl font-bold tracking-wider text-slate-700">
                   家 計 簿
                 </h2>
-                {date && (
+                {selectedDate && (
                   <p className="text-lg mt-1 font-medium text-slate-500">
-                    {date.replace("-", "年")}月
+                    {selectedDate.getFullYear()}年{selectedDate.getMonth() + 1}月
                   </p>
                 )}
               </div>
