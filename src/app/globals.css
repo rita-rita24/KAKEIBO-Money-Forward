@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f5;
-  --foreground: #171717;
+  --background: #f0f7f0;
+  --foreground: #1a2e1a;
 }
 
 @theme inline {
@@ -23,6 +23,8 @@ body {
     background: white;
     margin: 0;
     padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .no-print {
@@ -38,8 +40,41 @@ body {
     border: none;
   }
 
+  .print-area > div {
+    padding: 4mm 6mm !important;
+  }
+
+  .print-area h2 {
+    font-size: 16pt !important;
+    margin-bottom: 2mm !important;
+  }
+
+  .print-area h3 {
+    font-size: 9pt !important;
+    margin-bottom: 1mm !important;
+  }
+
+  .print-area table {
+    font-size: 8pt !important;
+  }
+
+  .print-area td,
+  .print-area th {
+    padding: 1px 4px !important;
+  }
+
+  .print-area .comment-section p {
+    font-size: 8pt !important;
+    min-height: 2em !important;
+  }
+
+  .print-area .summary-table td {
+    padding: 2px 6px !important;
+    font-size: 9pt !important;
+  }
+
   @page {
-    margin: 10mm;
+    margin: 8mm;
     size: A4;
   }
 }

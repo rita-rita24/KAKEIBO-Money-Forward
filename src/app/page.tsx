@@ -91,11 +91,11 @@ export default function Home() {
     <div className="min-h-screen py-8 px-4">
       {/* Input Form */}
       <div className="no-print max-w-2xl mx-auto mb-8">
-        <h1 className="text-2xl font-bold text-center mb-6">
+        <h1 className="text-2xl font-bold text-center mb-6 text-green-800">
           家計簿作成ツール
         </h1>
 
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <div className="bg-white rounded-lg shadow p-6 space-y-4 border-t-4 border-green-600">
           <div>
             <label className="block text-sm font-medium mb-1">年月</label>
             <input
@@ -176,7 +176,7 @@ export default function Home() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowPreview(true)}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 font-medium cursor-pointer"
+              className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 font-medium cursor-pointer"
             >
               プレビュー表示
             </button>
@@ -208,45 +208,47 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-gray-200">
+          <div className="print-area max-w-[210mm] mx-auto bg-white shadow-lg border border-green-200">
             <div className="p-8">
               {/* Header */}
-              <div className="text-center mb-6 border-b-2 border-gray-800 pb-4">
-                <h2 className="text-xl font-bold tracking-wider">家 計 簿</h2>
+              <div className="text-center mb-4 border-b-2 border-green-700 pb-3">
+                <h2 className="text-xl font-bold tracking-wider text-green-800">
+                  家 計 簿
+                </h2>
                 {date && (
-                  <p className="text-lg mt-2 font-medium">
+                  <p className="text-lg mt-1 font-medium text-green-700">
                     {date.replace("-", "年")}月
                   </p>
                 )}
               </div>
 
               {/* Summary */}
-              <div className="mb-6">
-                <table className="w-full border-collapse">
+              <div className="mb-4">
+                <table className="summary-table w-full border-collapse">
                   <tbody>
-                    <tr className="border border-gray-400">
-                      <td className="border border-gray-400 bg-gray-100 px-4 py-2 font-medium w-1/3 text-center">
+                    <tr className="border border-green-400">
+                      <td className="border border-green-400 bg-green-100 px-4 py-2 font-medium w-1/3 text-center text-green-800">
                         収入
                       </td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">
+                      <td className="border border-green-400 px-4 py-2 text-right">
                         {formatCurrency(incomeNum)}
                       </td>
                     </tr>
-                    <tr className="border border-gray-400">
-                      <td className="border border-gray-400 bg-gray-100 px-4 py-2 font-medium text-center">
+                    <tr className="border border-green-400">
+                      <td className="border border-green-400 bg-green-100 px-4 py-2 font-medium text-center text-green-800">
                         支出
                       </td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">
+                      <td className="border border-green-400 px-4 py-2 text-right">
                         {formatCurrency(expenseNum)}
                       </td>
                     </tr>
-                    <tr className="border border-gray-400">
-                      <td className="border border-gray-400 bg-gray-100 px-4 py-2 font-medium text-center">
+                    <tr className="border border-green-400">
+                      <td className="border border-green-400 bg-green-600 px-4 py-2 font-bold text-center text-white">
                         収支
                       </td>
                       <td
-                        className={`border border-gray-400 px-4 py-2 text-right font-bold ${
-                          balance >= 0 ? "text-black" : "text-red-600"
+                        className={`border border-green-400 px-4 py-2 text-right font-bold ${
+                          balance >= 0 ? "text-green-700" : "text-red-600"
                         }`}
                       >
                         {balance >= 0 ? "+" : ""}
@@ -259,20 +261,20 @@ export default function Home() {
 
               {/* Items Detail */}
               {parsedItems.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-bold mb-2 border-b border-gray-400 pb-1">
+                <div className="mb-4">
+                  <h3 className="text-sm font-bold mb-1 border-b-2 border-green-600 pb-1 text-green-800">
                     支出内訳
                   </h3>
                   <table className="w-full border-collapse text-sm">
                     <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border border-gray-400 px-3 py-1.5 text-left">
+                      <tr className="bg-green-700 text-white">
+                        <th className="border border-green-600 px-3 py-1.5 text-left">
                           項目
                         </th>
-                        <th className="border border-gray-400 px-3 py-1.5 text-right w-28">
+                        <th className="border border-green-600 px-3 py-1.5 text-right w-28">
                           金額
                         </th>
-                        <th className="border border-gray-400 px-3 py-1.5 text-right w-20">
+                        <th className="border border-green-600 px-3 py-1.5 text-right w-20">
                           割合
                         </th>
                       </tr>
@@ -282,20 +284,37 @@ export default function Home() {
                         <tr
                           key={idx}
                           className={
-                            item.isCategory ? "bg-gray-50 font-medium" : ""
+                            item.isCategory
+                              ? "bg-green-100 font-bold border-t-2 border-t-green-500"
+                              : "hover:bg-green-50"
                           }
                         >
                           <td
-                            className={`border border-gray-400 px-3 py-1 ${
-                              !item.isCategory ? "pl-6" : ""
+                            className={`border border-green-300 px-3 py-1 ${
+                              item.isCategory
+                                ? "text-green-800 bg-green-100"
+                                : "pl-6"
                             }`}
                           >
+                            {item.isCategory ? "■ " : ""}
                             {item.name}
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-right">
+                          <td
+                            className={`border border-green-300 px-3 py-1 text-right ${
+                              item.isCategory
+                                ? "text-green-800 bg-green-100"
+                                : ""
+                            }`}
+                          >
                             {formatCurrency(item.amount)}
                           </td>
-                          <td className="border border-gray-400 px-3 py-1 text-right">
+                          <td
+                            className={`border border-green-300 px-3 py-1 text-right ${
+                              item.isCategory
+                                ? "text-green-800 bg-green-100"
+                                : ""
+                            }`}
+                          >
                             {item.percentage.toFixed(2)}%
                           </td>
                         </tr>
@@ -307,11 +326,11 @@ export default function Home() {
 
               {/* Comment */}
               {comment && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-bold mb-2 border-b border-gray-400 pb-1">
+                <div className="comment-section mb-2">
+                  <h3 className="text-sm font-bold mb-1 border-b-2 border-green-600 pb-1 text-green-800">
                     コメント
                   </h3>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2 border border-gray-300 rounded min-h-[3em]">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed p-2 border border-green-300 rounded bg-green-50 min-h-[3em]">
                     {comment}
                   </p>
                 </div>
