@@ -96,17 +96,20 @@ body {
     padding: 0;
     box-shadow: none;
     border: none;
+    border-radius: 0;
     page-break-inside: avoid;
     break-inside: avoid;
+    overflow: visible;
   }
 
   .print-area > div {
     padding: 4mm 6mm !important;
   }
 
-  /* Shrink content to fit one page */
+  /* Ensure content fits on one page */
   .print-scale-wrapper {
-    transform-origin: top left;
+    max-height: 281mm;
+    overflow: hidden;
   }
 
   .print-area h2 {
