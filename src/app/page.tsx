@@ -172,6 +172,60 @@ export default function Home() {
     pdf.save(`${formatDateForTitle()}.pdf`);
   }, [formatDateForTitle]);
 
+  const handleCsvDownload = useCallback(() => {
+    const BOM = "\uFEFF";
+    const lines: string[] = [];
+
+    // ヘッダー
+    if (selectedDate) {
+      const y = selectedDate.getFullYear();
+      const m = selectedDate.getMonth() + 1;
+      lines.push(`${y}年${m}月 家計簿`);
+    } else {
+      lines.push("家計簿");
+    }
+    lines.push("");
+
+    // サマリー
+    lines.push("項目,金額");
+    lines.push(`収入,${incomeNum}`);
+    lines.push(`支出,${expenseNum}`);
+    lines.push(`収支,${balance}`);
+    lines.push(`貯金,${savingsNum}`);
+    lines.push(`投資信託,${investmentNum}`);
+    lines.push(`暗号資産,${cryptoNum}`);
+    lines.push("");
+
+    // 支出内訳
+    if (parsedItems.length > 0) {
+      lines.push("支出内訳");
+      lines.push("項目,金額,割合");
+      for (const item of parsedItems) {
+        const name = item.name.includes(",") ? `"${item.name}"` : item.name;
+        lines.push(`${name},${item.amount},${item.percentage.toFixed(2)}%`);
+      }
+      lines.push("");
+    }
+
+    // コメント
+    if (comment) {
+      lines.push("コメント");
+      const escaped = comment.includes(",") || comment.includes("\n")
+        ? `"${comment.replace(/"/g, '""')}"`
+        : comment;
+      lines.push(escaped);
+    }
+
+    const csvContent = BOM + lines.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${formatDateForTitle()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [selectedDate, incomeNum, expenseNum, balance, savingsNum, investmentNum, cryptoNum, parsedItems, comment, formatDateForTitle]);
+
   const loadSample = () => {
     setSelectedDate(new Date(2025, 0));
     setIncome("350000");
@@ -343,6 +397,12 @@ export default function Home() {
               className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 font-medium cursor-pointer transition-colors"
             >
               PDFダウンロード
+            </button>
+            <button
+              onClick={handleCsvDownload}
+              className="bg-emerald-500 text-white py-2 px-6 rounded-lg hover:bg-emerald-600 font-medium cursor-pointer transition-colors"
+            >
+              CSVダウンロード
             </button>
             <button
               onClick={() => setShowPreview(false)}
