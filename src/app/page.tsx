@@ -1,21 +1,31 @@
 "use client";
 
+// ===== ライブラリのインポート =====
 import { useState, useMemo, useRef, useCallback } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ja } from "date-fns/locale";
-import html2canvas from "html2canvas-pro";
-import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas-pro"; // プレビュー画面をキャプチャしてPDF生成に使用
+import { jsPDF } from "jspdf"; // PDF生成ライブラリ
 import "react-datepicker/dist/react-datepicker.css";
 
+// 日付ピッカーを日本語化
 registerLocale("ja", ja);
 
+/**
+ * 支出内訳の1行分のデータ型
+ * Money Forwardからコピーしたタブ区切りデータをパースした結果
+ */
 interface ItemRow {
-  name: string;
-  amount: number;
-  percentage: number;
-  isCategory: boolean;
+  name: string;       // 項目名（例: 「食費 合計」「コンビニ」）
+  amount: number;     // 金額（円）
+  percentage: number; // 支出全体に対する割合（%）
+  isCategory: boolean; // カテゴリ行（「合計」を含む行）かどうか
 }
 
+/**
+ * タブ区切りテキストをパースして支出内訳の配列に変換する
+ * 入力形式: 「項目名\t金額\t割合」の各行（Money Forward等からコピー）
+ */
 function parseItems(text: string): ItemRow[] {
   if (!text.trim()) return [];
   const lines = text.trim().split("\n");
@@ -38,10 +48,12 @@ function parseItems(text: string): ItemRow[] {
   return rows;
 }
 
+/** 数値を日本円表記にフォーマットする（例: 35000 → "35,000円"） */
 function formatCurrency(value: number): string {
   return value.toLocaleString("ja-JP") + "円";
 }
 
+/** デモ用のサンプルデータ（タブ区切り形式） */
 const SAMPLE_ITEMS = `食費 合計\t35,000円\t10.00%
 コンビニ\t12,000円\t3.43%
 スーパー\t10,500円\t3.00%
@@ -94,32 +106,38 @@ ATM引き出し\t10,000円\t2.86%
 投資\t55,000円\t15.71%`;
 
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [income, setIncome] = useState("");
-  const [expense, setExpense] = useState("");
-  const [savings, setSavings] = useState("");
-  const [investment, setInvestment] = useState("");
-  const [crypto, setCrypto] = useState("");
-  const [itemsText, setItemsText] = useState("");
-  const [comment, setComment] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
+  // ===== フォーム入力の状態管理 =====
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 対象年月
+  const [income, setIncome] = useState("");      // 収入（文字列で管理し、表示時に数値変換）
+  const [expense, setExpense] = useState("");     // 支出
+  const [savings, setSavings] = useState("");     // 貯金
+  const [investment, setInvestment] = useState(""); // 投資信託
+  const [crypto, setCrypto] = useState("");       // 暗号資産
+  const [itemsText, setItemsText] = useState(""); // 支出内訳（タブ区切りテキスト）
+  const [comment, setComment] = useState("");     // 振り返りコメント
+  const [showPreview, setShowPreview] = useState(false); // プレビュー表示の切り替え
 
+  // 収支 = 収入 − 支出（収入・支出が変わるたびに自動計算）
   const balance = useMemo(() => {
     const inc = parseInt(income.replace(/,/g, ""), 10) || 0;
     const exp = parseInt(expense.replace(/,/g, ""), 10) || 0;
     return inc - exp;
   }, [income, expense]);
 
+  // 支出内訳テキストをパースした結果（テキストが変わるたびに再計算）
   const parsedItems = useMemo(() => parseItems(itemsText), [itemsText]);
 
+  // 各入力値を数値に変換（カンマ区切りに対応）
   const incomeNum = parseInt(income.replace(/,/g, ""), 10) || 0;
   const expenseNum = parseInt(expense.replace(/,/g, ""), 10) || 0;
   const savingsNum = parseInt(savings.replace(/,/g, ""), 10) || 0;
   const investmentNum = parseInt(investment.replace(/,/g, ""), 10) || 0;
   const cryptoNum = parseInt(crypto.replace(/,/g, ""), 10) || 0;
 
+  // PDF生成時にキャプチャするプレビュー領域への参照
   const printContentRef = useRef<HTMLDivElement>(null);
 
+  /** ダウンロードファイル名に使う日付文字列を生成する（例: 「家計簿-2025年01月」） */
   const formatDateForTitle = useCallback(() => {
     if (!selectedDate) return "家計簿";
     const y = selectedDate.getFullYear();
@@ -127,44 +145,48 @@ export default function Home() {
     return `家計簿-${y}年${m}月`;
   }, [selectedDate]);
 
+  /**
+   * PDFダウンロード処理
+   * プレビュー領域をhtml2canvasで画像化し、A4サイズのPDFとして保存する
+   */
   const handlePrint = useCallback(async () => {
     const el = printContentRef.current;
     if (!el) return;
 
-    // Capture the element exactly as displayed on screen
+    // プレビュー領域を高解像度（2倍）で画像としてキャプチャする
     const canvas = await html2canvas(el, {
-      scale: 2, // High resolution for crisp PDF
+      scale: 2, // 高解像度で鮮明なPDFを生成
       useCORS: true,
       backgroundColor: "#ffffff",
     });
 
-    // Use JPEG with quality 0.85 to keep PDF under 10MB (typically under 1MB)
+    // JPEG形式（品質0.85）で変換し、ファイルサイズを抑える（通常1MB以下）
     const imgData = canvas.toDataURL("image/jpeg", 0.85);
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
 
-    // A4 dimensions in mm
+    // A4用紙のサイズ（単位: mm）
     const pdfWidth = 210;
     const pdfHeight = 297;
-    const margin = 8; // mm margin on each side
-    const topMargin = 5;
-    const bottomMargin = 5;
+    const margin = 8;        // 左右の余白
+    const topMargin = 5;     // 上の余白
+    const bottomMargin = 5;  // 下の余白
 
     const contentWidth = pdfWidth - margin * 2;
     const contentMaxHeight = pdfHeight - topMargin - bottomMargin;
 
-    // Scale image to fit within the content area
+    // 画像のアスペクト比を維持しながらコンテンツ領域に収まるよう拡縮する
     const ratio = imgWidth / imgHeight;
     let finalWidth = contentWidth;
     let finalHeight = contentWidth / ratio;
 
-    // If too tall, scale down to fit height
+    // 高さがはみ出す場合は高さ基準で縮小する
     if (finalHeight > contentMaxHeight) {
       finalHeight = contentMaxHeight;
       finalWidth = contentMaxHeight * ratio;
     }
 
-    // Center horizontally
+    // 水平方向の中央揃え
     const xOffset = margin + (contentWidth - finalWidth) / 2;
 
     const pdf = new jsPDF("portrait", "mm", "a4");
@@ -172,11 +194,16 @@ export default function Home() {
     pdf.save(`${formatDateForTitle()}.pdf`);
   }, [formatDateForTitle]);
 
+  /**
+   * CSVダウンロード処理
+   * サマリー情報・支出内訳・コメントをCSV形式で出力する
+   */
   const handleCsvDownload = useCallback(() => {
+    // BOM（バイトオーダーマーク）を付与してExcelでの文字化けを防止
     const BOM = "\uFEFF";
     const lines: string[] = [];
 
-    // ヘッダー
+    // CSVの先頭にタイトル行を追加
     if (selectedDate) {
       const y = selectedDate.getFullYear();
       const m = selectedDate.getMonth() + 1;
@@ -186,7 +213,7 @@ export default function Home() {
     }
     lines.push("");
 
-    // サマリー
+    // 収入・支出などのサマリー情報を出力
     lines.push("項目,金額");
     lines.push(`収入,${incomeNum}`);
     lines.push(`支出,${expenseNum}`);
@@ -196,7 +223,7 @@ export default function Home() {
     lines.push(`暗号資産,${cryptoNum}`);
     lines.push("");
 
-    // 支出内訳
+    // 支出内訳の各項目を出力（カンマを含む項目名はダブルクォートで囲む）
     if (parsedItems.length > 0) {
       lines.push("支出内訳");
       lines.push("項目,金額,割合");
@@ -207,7 +234,7 @@ export default function Home() {
       lines.push("");
     }
 
-    // コメント
+    // コメントを出力（カンマ・改行を含む場合はCSVエスケープ処理を行う）
     if (comment) {
       lines.push("コメント");
       const escaped = comment.includes(",") || comment.includes("\n")
@@ -216,6 +243,7 @@ export default function Home() {
       lines.push(escaped);
     }
 
+    // CSV文字列を組み立ててBlobオブジェクトとしてダウンロードさせる
     const csvContent = BOM + lines.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -223,9 +251,10 @@ export default function Home() {
     link.href = url;
     link.download = `${formatDateForTitle()}.csv`;
     link.click();
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url); // メモリリークを防ぐためURLを解放
   }, [selectedDate, incomeNum, expenseNum, balance, savingsNum, investmentNum, cryptoNum, parsedItems, comment, formatDateForTitle]);
 
+  /** デモ用にサンプルデータを全フィールドに読み込む */
   const loadSample = () => {
     setSelectedDate(new Date(2025, 0));
     setIncome("350000");
@@ -239,7 +268,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      {/* Input Form */}
+      {/* ===== 入力フォーム ===== */}
       <div className="no-print max-w-2xl mx-auto mb-8">
         <h1 className="text-2xl font-bold text-center mb-6 text-slate-700">
           家計簿作成ツール
@@ -388,7 +417,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Preview / Print Area */}
+      {/* ===== プレビュー・ダウンロード領域 ===== */}
       {showPreview && (
         <>
           <div className="no-print max-w-2xl mx-auto mb-4 flex gap-3">
@@ -414,7 +443,7 @@ export default function Home() {
 
           <div className="print-area max-w-[160mm] mx-auto bg-white shadow-lg border border-stone-200 rounded-lg overflow-hidden">
             <div ref={printContentRef} className="p-8 print-scale-wrapper">
-              {/* Header */}
+              {/* タイトルヘッダー（家計簿タイトルと年月） */}
               <div className="text-center mb-5 border-b-2 border-stone-300 pb-3">
                 <h2 className="text-xl font-bold tracking-[0.3em] text-stone-800">
                   家 計 簿
@@ -426,9 +455,9 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Summary */}
+              {/* サマリーテーブル（収入・支出・貯金など） */}
               <div className="mb-5 grid grid-cols-2 gap-3">
-                {/* Left: 収入・支出・収支 */}
+                {/* 左側: 収入・支出・収支 */}
                 <table className="summary-table w-full border-collapse">
                   <tbody>
                     <tr>
@@ -462,7 +491,7 @@ export default function Home() {
                   </tbody>
                 </table>
 
-                {/* Right: 貯金・投資信託・暗号資産 */}
+                {/* 右側: 貯金・投資信託・暗号資産 */}
                 <table className="summary-table w-full border-collapse">
                   <tbody>
                     <tr>
@@ -493,7 +522,7 @@ export default function Home() {
                 </table>
               </div>
 
-              {/* Items Detail */}
+              {/* 支出内訳テーブル（カテゴリごとに項目・金額・割合を表示） */}
               {parsedItems.length > 0 && (
                 <div className="mb-4">
                   <h3 className="text-sm font-bold mb-1.5 border-b-2 border-stone-300 pb-1 text-stone-700">
@@ -555,7 +584,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Comment */}
+              {/* コメント欄（振り返りメモの表示） */}
               {comment && (
                 <div className="comment-section mb-2">
                   <h3 className="text-sm font-bold mb-1.5 border-b-2 border-stone-300 pb-1 text-stone-700">

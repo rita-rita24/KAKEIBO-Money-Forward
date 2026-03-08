@@ -17,7 +17,7 @@ body {
     sans-serif;
 }
 
-/* DatePicker custom styles */
+/* ===== 日付ピッカーのカスタムスタイル ===== */
 .react-datepicker {
   font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif !important;
   border: 1px solid #e2e8f0 !important;
@@ -75,7 +75,7 @@ body {
   padding: 4px 8px !important;
 }
 
-/* Print styles (fallback for browser print) */
+/* ===== 印刷時のスタイル（ブラウザ印刷のフォールバック用） ===== */
 @media print {
   body {
     background: white;
